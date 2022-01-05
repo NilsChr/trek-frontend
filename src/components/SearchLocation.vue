@@ -4,7 +4,7 @@
     outlined
     dense
     hide-details
-    v-model="model"
+    v-model="value"
     :items="items"
     :search-input.sync="search"
     :loading="isLoading"
@@ -21,7 +21,7 @@
 import axios from "axios";
 
 export default {
-  props: ["placeholder", "disabled"],
+  props: ["placeholder", "disabled", "model"],
   data() {
     return {
       searchInterval: null,
@@ -29,14 +29,19 @@ export default {
       descriptionLimit: 60,
       entries: [],
       isLoading: false,
-      model: null,
+      /*model: null,*/
+      value: null,
       search: null,
     };
   },
+  methods: {},
   computed: {
     darkmode() {
       return this.$store.state.darkmode;
     },
+  },
+  created() {
+    this.value = this.model;
   },
   watch: {
     async search(val) {
@@ -53,9 +58,9 @@ export default {
         that.items = res.data.locations;
       }, 300);
     },
-    model(val) {
+    value(val) {
       this.$emit("change", val);
-    },
+    }
   },
 };
 </script>

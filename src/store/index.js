@@ -17,6 +17,7 @@ export default new Vuex.Store({
     loadingRoute: false,
     bbox: null,
     distance: 0,
+    viaList: [],
   },
   getters: {},
   mutations: {
@@ -41,6 +42,9 @@ export default new Vuex.Store({
     SET_DISTANCE(state, distance) {
       state.distance = distance;
     },
+    SET_VIA_LIST(state, viaList) {
+      state.viaList = viaList;
+    },
   },
   actions: {
     async LOAD_ROUTE({ commit, state }) {
@@ -48,6 +52,14 @@ export default new Vuex.Store({
       let parsed = [];
       parsed.push(["start", longLatToParams(state.origin)]);
       parsed.push(["stop", longLatToParams(state.destination)]);
+
+      for (let i = 0; i < state.viaList.length; i++) {
+        let destination = [
+          state.viaList[i].longitude,
+          state.viaList[i].latitude,
+        ];
+        parsed.push(["via", longLatToParams(destination)]);
+      }
 
       const params = new URLSearchParams([...parsed]);
 

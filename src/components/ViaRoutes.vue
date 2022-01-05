@@ -1,22 +1,27 @@
 <template>
   <v-layout column>
     <v-flex>
-      <v-layout v-for="(v, i) in via" :key="i" class="ma-1">
-        <search-location @change="_handleViaChange($event, i)" />
-        {{ v }}
+      <v-layout class="ma-1">
+        <search-location @change="_handleViaChange" />
+      </v-layout>
+      <v-layout class="ma-2" justify-center>
+        <v-btn class="mx-2" fab x-small color="primary" @click="addVia">
+          <v-icon> mdi-plus </v-icon>
+        </v-btn>
+      </v-layout>
+      <v-layout
+        v-for="(v, i) in viaList"
+        :key="i"
+        class=""
+        justify-space-between
+      >
+        <label class="mt-2">{{ v.name }}</label>
+        <!-- ADD SKIP -->
         <v-btn class="mt-1" fab x-small text @click="removeVia(i)">
           <v-icon> mdi-close </v-icon>
         </v-btn>
       </v-layout>
     </v-flex>
-    <v-flex xs1>
-      <v-layout justify-center>
-        <v-btn class="mx-2" fab x-small color="primary" @click="addVia">
-          <v-icon> mdi-plus </v-icon>
-        </v-btn>
-      </v-layout>
-    </v-flex>
-    {{values}}
   </v-layout>
 </template>
 
@@ -26,23 +31,23 @@ export default {
   components: { SearchLocation },
   data() {
     return {
-      id: 1,
-      via: [],
-      values: [],
+      viaModel: null,
+      viaList: [],
     };
   },
   methods: {
+    _handleViaChange(e) {
+      this.viaModel = e;
+    },
     addVia() {
-      this.via.push({ id: this.id++ });
+      this.viaList.push(this.viaModel);
+      this.$store.commit("SET_VIA_LIST", this.viaList);
+      this.$store.dispatch("LOAD_ROUTE");
     },
     removeVia(id) {
-      this.via.splice(id, 1);
-      this.values[id] = null;
-    },
-    _handleViaChange(e, v) {
-      console.log("Handle change", e, v);
-      this.values[v] = e;
-      console.log(this.values);
+      this.viaList.splice(id, 1);
+      this.$store.commit("SET_VIA_LIST", this.viaList);
+      this.$store.dispatch("LOAD_ROUTE");
     },
   },
 };

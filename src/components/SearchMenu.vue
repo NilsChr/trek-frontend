@@ -17,6 +17,7 @@
             placeholder="Origin"
             @change="_handleOriginChange"
             :disabled="loadingRoute"
+            :model="origin"
           />
         </v-flex>
         <v-flex xs1 class="mt-3 mr-3 ml-3">
@@ -24,6 +25,7 @@
             placeholder="Destination"
             @change="_handleDestinationChange"
             :disabled="loadingRoute"
+            :origin="destination"
           />
         </v-flex>
         <!--
@@ -67,16 +69,21 @@ import ViaRoutes from "./ViaRoutes.vue";
 export default {
   components: { SearchLocation, ViaRoutes },
   data() {
-    return {};
+    return {
+        origin: null,
+        destination: null,
+    };
   },
   methods: {
     _handleOriginChange(e) {
       if (!e) return;
+      this.origin = e;
       this.$store.commit("SET_ORIGIN", [e.longitude, e.latitude]);
       this.$store.dispatch("LOAD_ROUTE");
     },
     _handleDestinationChange(e) {
       if (!e) return;
+      this.destination = e;
       this.$store.commit("SET_DESTINATION", [e.longitude, e.latitude]);
       this.$store.dispatch("LOAD_ROUTE");
     },
