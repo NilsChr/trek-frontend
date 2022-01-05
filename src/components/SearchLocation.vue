@@ -6,13 +6,14 @@
     hide-details
     v-model="model"
     :items="items"
-    :loading="isLoading"
     :search-input.sync="search"
+    :loading="isLoading"
     hide-no-data
     hide-selected
     item-text="name"
     :placeholder="placeholder"
     return-object
+    :disabled="disabled"
   ></v-autocomplete>
 </template>
 
@@ -20,7 +21,7 @@
 import axios from "axios";
 
 export default {
-  props: ['placeholder'],
+  props: ["placeholder", "disabled"],
   data() {
     return {
       searchInterval: null,
@@ -33,9 +34,9 @@ export default {
     };
   },
   computed: {
-      darkmode(){
-          return this.$store.state.darkmode;
-      }
+    darkmode() {
+      return this.$store.state.darkmode;
+    },
   },
   watch: {
     async search(val) {
@@ -53,8 +54,8 @@ export default {
       }, 300);
     },
     model(val) {
-        this.$emit('change', val);
-    }
+      this.$emit("change", val);
+    },
   },
 };
 </script>

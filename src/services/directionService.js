@@ -1,2 +1,0 @@
-//5b3ce3597851110001cf6248b9ccaf4c71664f7bad227282dc422feb
-// google api : AIzaSyBEmhCMDEzEFiL4uKGfWRF5G0pnjok0VMQ

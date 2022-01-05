@@ -1,11 +1,7 @@
 <template>
   <v-container fluid fill-height class="pa-0 ma-0">
     <div id="map" :style="{ height: height + 'px', width: width + 'px' }">
-        <!--
-      <mapbox-map v-if="!darkmode"/>
-      <mapbox-map-dark v-if="darkmode" />
-      -->
-      <m-box/>
+      <m-box />
     </div>
 
     <v-layout fill-height>
@@ -18,12 +14,10 @@
 
 <script>
 import SearchMenu from "../components/SearchMenu.vue";
-import MapboxMap from "../components/MapboxMap.vue";
-import MapboxMapDark from '../components/MapboxMapDark.vue';
-import MBox from '../components/MBox.vue';
+import MBox from "../components/MBox.vue";
 
 export default {
-  components: { SearchMenu, MapboxMap, MapboxMapDark, MBox },
+  components: { SearchMenu, MBox },
   name: "trek-map",
   data() {
     return {
@@ -32,9 +26,9 @@ export default {
     };
   },
   computed: {
-      darkmode() {
-          return this.$store.state.darkmode;
-      }
+    darkmode() {
+      return this.$store.state.darkmode;
+    },
   },
   mounted() {
     this.width = window.innerWidth;

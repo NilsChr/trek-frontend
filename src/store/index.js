@@ -14,6 +14,7 @@ export default new Vuex.Store({
     origin: [0, 0],
     destination: [0, 0],
     route: null,
+    loadingRoute: false,
     bbox: null,
     distance: 0,
   },
@@ -31,6 +32,9 @@ export default new Vuex.Store({
     SET_ROUTE(state, route) {
       state.route = route;
     },
+    SET_LOADING_ROUTE(state, loadingRoute) {
+      state.loadingRoute = loadingRoute;
+    },
     SET_BBOX(state, bbox) {
       state.bbox = bbox;
     },
@@ -40,6 +44,7 @@ export default new Vuex.Store({
   },
   actions: {
     async LOAD_ROUTE({ commit, state }) {
+      commit("SET_LOADING_ROUTE", true);
       let parsed = [];
       parsed.push(["start", longLatToParams(state.origin)]);
       parsed.push(["stop", longLatToParams(state.destination)]);
@@ -48,7 +53,11 @@ export default new Vuex.Store({
 
       let res = await axios.get("http://localhost:3000/route/" + params);
       console.log(res);
-      if (res.data.length === 0) return;
+      if (res.data.length === 0) {
+        commit("SET_LOADING_ROUTE", false);
+
+        return;
+      }
       let route = {
         type: "geojson",
         data: {
@@ -66,6 +75,7 @@ export default new Vuex.Store({
 
       commit("SET_DISTANCE", distance);
       commit("SET_ROUTE", route);
+      commit("SET_LOADING_ROUTE", false);
     },
   },
   modules: {},

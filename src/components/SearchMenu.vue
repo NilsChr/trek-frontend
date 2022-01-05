@@ -13,13 +13,34 @@
           </v-col>
         </v-flex>
         <v-flex xs1 class="ma-3">
-          <search-location placeholder="Origin" @change="_handleOriginChange" />
+          <search-location
+            placeholder="Origin"
+            @change="_handleOriginChange"
+            :disabled="loadingRoute"
+          />
         </v-flex>
-        <v-flex xs1 class="ma-3">
+        <v-flex xs1 class="mt-3 mr-3 ml-3">
           <search-location
             placeholder="Destination"
             @change="_handleDestinationChange"
+            :disabled="loadingRoute"
           />
+        </v-flex>
+        <!--
+        <v-flex xs1 class="ma-0">
+          <v-layout justify-center>
+            <v-progress-circular
+              class="ma-2"
+              :width="3"
+              v-if="loadingRoute"
+              indeterminate
+              color="primary"
+            ></v-progress-circular>
+          </v-layout>
+        </v-flex>
+        -->
+        <v-flex xs1 class="ma-3">
+          <via-routes />
         </v-flex>
       </v-layout>
       <v-layout column justify-end align-end>
@@ -41,9 +62,10 @@
 
 <script>
 import SearchLocation from "./SearchLocation.vue";
+import ViaRoutes from "./ViaRoutes.vue";
 
 export default {
-  components: { SearchLocation },
+  components: { SearchLocation, ViaRoutes },
   data() {
     return {};
   },
@@ -67,6 +89,9 @@ export default {
       get() {
         return this.$store.state.darkmode;
       },
+    },
+    loadingRoute() {
+      return this.$store.state.loadingRoute;
     },
   },
 };
