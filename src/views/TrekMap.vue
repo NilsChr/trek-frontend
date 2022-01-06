@@ -29,6 +29,9 @@ export default {
     darkmode() {
       return this.$store.state.darkmode;
     },
+    error() {
+      return this.$store.state.error;
+    },
   },
   mounted() {
     this.width = window.innerWidth;

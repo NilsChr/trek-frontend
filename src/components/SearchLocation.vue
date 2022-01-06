@@ -14,11 +14,14 @@
     :placeholder="placeholder"
     return-object
     :disabled="disabled"
+    full-width
+    class="search-loader"
   ></v-autocomplete>
 </template>
 
 <script>
 import axios from "axios";
+import TREK_API from "../services/trekApi";
 
 export default {
   props: ["placeholder", "disabled", "model"],
@@ -29,7 +32,6 @@ export default {
       descriptionLimit: 60,
       entries: [],
       isLoading: false,
-      /*model: null,*/
       value: null,
       search: null,
     };
@@ -51,19 +53,19 @@ export default {
       this.searchInterval = setTimeout(async function () {
         that.isLoading = true;
         if (that.search == "") return;
-        let res = await axios.get(
-          "http://localhost:3000/search/" + that.search
-        );
+        that.items = await TREK_API.getLocations(that.search);
         that.isLoading = false;
-        that.items = res.data.locations;
       }, 300);
     },
     value(val) {
       this.$emit("change", val);
-    }
+    },
   },
 };
 </script>
 
-<style>
+<style scoped>
+.search-loader {
+  font-size: 0.7em;
+}
 </style>

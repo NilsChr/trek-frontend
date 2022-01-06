@@ -1,12 +1,8 @@
-import axios from "axios";
 import Vue from "vue";
 import Vuex from "vuex";
+import TREK_API from "../services/trekApi";
 
 Vue.use(Vuex);
-
-function longLatToParams(longLtd) {
-  return longLtd[1] + "%2C%20" + longLtd[0];
-}
 
 export default new Vuex.Store({
   state: {
@@ -18,6 +14,7 @@ export default new Vuex.Store({
     bbox: null,
     distance: 0,
     viaList: [],
+    error: null,
   },
   getters: {},
   mutations: {
@@ -45,29 +42,23 @@ export default new Vuex.Store({
     SET_VIA_LIST(state, viaList) {
       state.viaList = viaList;
     },
+    SET_ERROR(state, error) {
+      state.error = error;
+    },
   },
   actions: {
     async LOAD_ROUTE({ commit, state }) {
       commit("SET_LOADING_ROUTE", true);
-      let parsed = [];
-      parsed.push(["start", longLatToParams(state.origin)]);
-      parsed.push(["stop", longLatToParams(state.destination)]);
-
-      for (let i = 0; i < state.viaList.length; i++) {
-        let destination = [
-          state.viaList[i].longitude,
-          state.viaList[i].latitude,
-        ];
-        parsed.push(["via", longLatToParams(destination)]);
+      let res;
+      try {
+        res = await TREK_API.getRoute();
+      } catch (e) {
+        commit("SET_LOADING_ROUTE", false);
+        return;
       }
 
-      const params = new URLSearchParams([...parsed]);
-
-      let res = await axios.get("http://localhost:3000/route/" + params);
-      console.log(res);
       if (res.data.length === 0) {
         commit("SET_LOADING_ROUTE", false);
-
         return;
       }
       let route = {
