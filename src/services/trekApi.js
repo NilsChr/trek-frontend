@@ -10,11 +10,18 @@ const url =
     ? "http://localhost:3000"
     : "https://trek-api.eirik.dev";
 
+
+
 const TREK_API = {
   getLocations: function (location) {
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.get(url + "/search/" + location);
+        console.log("Get location", location)
+        //locations?query=
+        const params = new URLSearchParams();
+        params.append('query',location);
+        console.log(url)
+        let res = await axios.get(url + "/search/location?" + params);
         resolve(res.data.locations);
       } catch (e) {
         store.commit(
