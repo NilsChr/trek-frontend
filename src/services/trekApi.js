@@ -2,7 +2,7 @@ import axios from "axios";
 import store from "../store/index";
 
 function longLatToParams(longLtd) {
-  return longLtd[1] + "%2C%20" + longLtd[0];
+  return longLtd[1] + "," + longLtd[0];
 }
 
 const url =
@@ -10,18 +10,13 @@ const url =
     ? "http://localhost:3000"
     : "https://trek-api.eirik.dev";
 
-
-
 const TREK_API = {
   getLocations: function (location) {
     return new Promise(async (resolve, reject) => {
       try {
-        console.log("Get location", location)
-        //locations?query=
         const params = new URLSearchParams();
         params.append('query',location);
-        console.log(url)
-        let res = await axios.get(url + "/search/location?" + params);
+        let res = await axios.get(url + "/search/locations?" + params);
         resolve(res.data.locations);
       } catch (e) {
         store.commit(
@@ -33,8 +28,6 @@ const TREK_API = {
     });
   },
   getRoute: function () {
-    console.log("GET ROUTE");
-
     return new Promise(async (resolve, reject) => {
       try {
         let parsed = [];
@@ -52,7 +45,7 @@ const TREK_API = {
           }
         }
         const params = new URLSearchParams([...parsed]);
-        let res = await axios.get(url + "/route/" + params);
+        let res = await axios.get(url + "/search/route?" + params);
         resolve(res);
       } catch (e) {
         store.commit(
