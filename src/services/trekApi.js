@@ -56,6 +56,45 @@ const TREK_API = {
       }
     });
   },
+  getAuthorizationUrl: function (tracker_name) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let backend_url = new URL("/user/auth/" + tracker_name, url);
+        backend_url.searchParams.set("redirect_url", location.origin + "/#/redirect");
+        let res = await axios.get(backend_url);
+        resolve(res.data.auth_url);
+      } catch (e) {
+        console.log("error!")
+        console.log(e)
+        reject(e);
+      }
+    });
+  },
+  getUserData: function () {
+    let token = localStorage.getItem("trekToken");
+    if (!(token)) {
+      console.log("not logged in")
+      return
+    }
+    return new Promise(async (resolve, reject) => {
+      try {
+        let res = await axios.get(url + "/user/me",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+        resolve(res.data);
+
+      } catch (e) {
+        console.log("error!")
+        console.log(e)
+        reject(e);
+      }
+    });
+  }
+
+
 };
 
 export default TREK_API;
