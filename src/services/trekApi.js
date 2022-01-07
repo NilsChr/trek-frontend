@@ -15,7 +15,7 @@ const TREK_API = {
     return new Promise(async (resolve, reject) => {
       try {
         const params = new URLSearchParams();
-        params.append('query',location);
+        params.append("query", location);
         let res = await axios.get(url + "/search/locations?" + params);
         resolve(res.data.locations);
       } catch (e) {
@@ -34,11 +34,15 @@ const TREK_API = {
         parsed.push(["start", longLatToParams(store.state.origin)]);
         parsed.push(["stop", longLatToParams(store.state.destination)]);
 
+        if(store.state.origin[0] === 0 && store.state.origin[1] === 0) return reject();
+        if(store.state.destination[0] === 0 && store.state.destination[1] === 0) return reject();
+
         for (let i = 0; i < store.state.viaList.length; i++) {
           let destination = [
             store.state.viaList[i]?.longitude,
             store.state.viaList[i]?.latitude,
           ];
+          if(destination[0] === 0 || destination[1] === 0) continue;
           parsed.push(["via", longLatToParams(destination)]);
           if (store.state.viaList[i].skip) {
             parsed.push(["skip_segments", i + 1]);
