@@ -10,7 +10,7 @@
       <v-layout v-if="!item.isAdder">
         <search-location
           :placeholder="item.placeholder"
-          @change="_handleChange($event, i)"
+          @change="handleChange($event, i)"
           :disabled="loadingRoute"
           :model="item.value"
         />
@@ -66,10 +66,7 @@ export default {
       ids: 1,
       list: [],
       searchInterval: null,
-      /*items: [],
-      entries: [],*/
       isLoading: false,
-      //value: null,
     };
   },
   methods: {
@@ -92,7 +89,7 @@ export default {
     expand(index) {
       this.list[index].isAdder = false;
       this.list[index].placeholder = "via";
-
+ 
       this.list.splice(index, 0, {
         id: this.ids++,
         isAdder: true,
@@ -127,7 +124,7 @@ export default {
       this.$store.commit("SET_VIA_LIST", viaList);
       this.$store.dispatch("LOAD_ROUTE");
     },
-    _handleChange(event, i) {
+    handleChange(event, i) {
       this.list[i].value = event;
       if (i == 0) {
         this.$store.commit("SET_ORIGIN", [event.longitude, event.latitude]);
