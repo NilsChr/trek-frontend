@@ -15,6 +15,7 @@
     return-object
     :disabled="disabled"
     full-width
+    :filter="filterResult"
     class="search-loader"
   ></v-autocomplete>
 </template>
@@ -36,7 +37,11 @@ export default {
       search: null,
     };
   },
-  methods: {},
+  methods: {
+    filterResult(item, queryText, itemText) {
+      return true;
+    },
+  },
   computed: {
     darkmode() {
       return this.$store.state.darkmode;
