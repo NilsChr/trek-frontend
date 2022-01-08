@@ -21,10 +21,6 @@
         </v-flex>
       </v-layout>
     </v-flex>
-    <v-img 
-      id="trip"
-      :src="'https://media.istockphoto.com/photos/silhouettes-of-hikers-at-sunset-picture-id1189073186?k=20&m=1189073186&s=612x612&w=0&h=A39ulfvLTHbKMNgj6xJV5Xq4ZJEcd66cNlsOJRey1Xk='"
-    ></v-img>
     <div id="flavor-top"></div>
     <div id="flavor-bot"></div>
   </v-layout>
@@ -63,12 +59,6 @@ export default {
   cursor: pointer;
 }
 
-#trip {
-  width:100%; 
-  height:100%; 
-  position: absolute;    
-  mask-image: linear-gradient(to top right, rgba(0,0,0,0.2), rgba(0,0,0,0));
-}
 #flavor-top {
   background-color: #94E016;
   position: absolute;
