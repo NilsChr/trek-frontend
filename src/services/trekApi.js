@@ -82,7 +82,7 @@ const TREK_API = {
         let backend_url = new URL("/user/auth/" + tracker_name, url);
         backend_url.searchParams.set(
           "redirect_url",
-          location.origin + "/#/redirect"
+          location.href.replace("/login", "/redirect")
         );
         let res = await axios.get(backend_url);
         resolve(res.data.auth_url);
