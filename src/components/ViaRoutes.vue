@@ -89,7 +89,7 @@ export default {
     expand(index) {
       this.list[index].isAdder = false;
       this.list[index].placeholder = "via";
- 
+
       this.list.splice(index, 0, {
         id: this.ids++,
         isAdder: true,
@@ -125,6 +125,15 @@ export default {
       this.$store.dispatch("LOAD_ROUTE");
     },
     handleChange(event, i) {
+      if (!event && i === 0) {
+        this.$store.commit("SET_ORIGIN", null);
+        return;
+      }
+      if (!event && this.list.length - 1) {
+        this.$store.commit("SET_DESTINATION", null);
+        return;
+      }
+
       this.list[i].value = event;
       if (i == 0) {
         this.$store.commit("SET_ORIGIN", [event.longitude, event.latitude]);

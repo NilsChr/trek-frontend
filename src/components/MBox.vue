@@ -35,6 +35,8 @@ export default {
       });
     },
     setOriginMarker() {
+      if (this.origin === null) return;
+
       this.originMarker = new Mapbox.Marker({
         color: "#befbeb",
         draggable: true,
@@ -43,6 +45,8 @@ export default {
         .addTo(this.map);
     },
     setDestinationMarker() {
+      if (this.destination === null) return;
+
       this.destinationMarker = new Mapbox.Marker({
         color: "#f23f5a",
         draggable: true,
