@@ -12,12 +12,25 @@
       </v-layout>
     </v-flex>
     <v-flex xs4>
-      <v-layout column align-center>
-        <v-flex class="text-xs-center ma-5"
-          >Sign in with fitbit to continue</v-flex
+      <v-layout align-center wrap justify-center>
+        <v-flex xs12 class="ma-5"  style="text-align:center;">
+          <label>Sign in to continue</label>
+        </v-flex>
+        <v-flex
+          class="ma-1"
+          xs7
+          v-for="tracker in trackers"
+          :key="tracker.name"
         >
-        <v-flex class="mt-5">
-          <div id="fitbit-signin" @click="login('fitbit')"></div>
+          <v-btn
+            :color="tracker.color"
+            @click="login(tracker.name)"
+            dark
+            block
+            elevation="0"
+          >
+            {{ tracker.name }}
+          </v-btn>
         </v-flex>
       </v-layout>
     </v-flex>
@@ -30,6 +43,16 @@
 import TREK_API from "../services/trekApi";
 
 export default {
+  data() {
+    return {
+      trackers: [
+        { name: "fitbit", color: "#0095b2" },
+        { name: "withings", color: "#49a9ec" },
+        { name: "google fit", color: "#377ab5" },
+        { name: "polar", color: "#dd4e4a" },
+      ],
+    };
+  },
   methods: {
     async login(tracker_name) {
       let redirect_url = await TREK_API.getAuthorizationUrl(tracker_name);
@@ -60,9 +83,9 @@ export default {
 }
 
 #flavor-top {
-  background-color: #94E016;
+  background-color: #94e016;
   position: absolute;
-  top:0px;
+  top: 0px;
   left: 0px;
   width: 50%;
   height: 30%;
@@ -71,7 +94,7 @@ export default {
 #flavor-bot {
   background-color: #0095b2;
   position: absolute;
-  bottom:0px;
+  bottom: 0px;
   right: 0px;
   width: 50%;
   height: 30%;

@@ -5,6 +5,8 @@
       <v-layout column>
         <v-flex xs2>
           <v-col cols="12">
+                Test
+
             <v-img
               v-if="!darkmode"
               :src="require('../assets/trek-logo.svg')"
