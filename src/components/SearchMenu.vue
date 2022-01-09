@@ -5,7 +5,7 @@
       <v-layout column>
         <v-flex xs2>
           <v-col cols="12">
-                Test
+                Test 2
 
             <v-img
               v-if="!darkmode"
