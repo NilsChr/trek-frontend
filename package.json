@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build_": "vue-cli-service build",
-    "build": "vue-cli-service build --skip-plugins pwa,workbox"
+    "build": "vue-cli-service build"
   },
   "dependencies": {
     "axios": "^0.24.0",
