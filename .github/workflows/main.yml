@@ -46,10 +46,10 @@ jobs:
           name: dist
           path: dist
       - name: sync Files to hosting
-        uses:  NilsChr/ftp-action@v1.3
+        uses: SamKirkland/FTP-Deploy-Action@master
         with:
-          ftp-host: ftp.bogsynth.com
-          ftp-username: trek-cd@bogsynth.com
-          ftp-password: ${{secrets.ftp_password}}
-          server-dir: /temp
+          FTP_SERVER: ftp.bogsynth.com
+          FTP_USERNAME: trek-cd@bogsynth.com
+          FTP_PASSWORD: ${{secrets.ftp_password}}
+          REMOTE_DIR: temp
           ftp-port: 21
