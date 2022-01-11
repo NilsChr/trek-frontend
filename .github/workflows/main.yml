@@ -39,3 +39,5 @@ jobs:
           port: 22
           username: trek-cd@bogsynth.com
           password: ${{secrets.ftp_password}}
+          timeout_minutes : 2
+          max_attempts : 3
