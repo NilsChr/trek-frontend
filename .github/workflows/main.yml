@@ -52,4 +52,3 @@ jobs:
           FTP_USERNAME: trek-cd@bogsynth.com
           FTP_PASSWORD: ${{secrets.ftp_password}}
           REMOTE_DIR: temp
-          ftp-port: 21
