@@ -3,7 +3,7 @@
     <error-500 v-if="error" />
     <v-layout column justify-space-between fill-height v-else>
       <v-layout column>
-        Test Docker - live with github actions
+        Test Docker - live with github actions2
         <v-flex xs2>
           <v-col cols="12">
             <v-img
