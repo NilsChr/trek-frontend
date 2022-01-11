@@ -33,27 +33,6 @@ jobs:
           name: dist
           path: dist
       - name: upload
-        continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@master
-        with:
-          server: ftp.bogsynth.com
-          username: trek-cd@bogsynth.com
-          password: ${{secrets.ftp_password}}
-          local-dir: ./dist/
-          server-dir: ./
-          port: 21
-      - name: retry1
-        continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@master
-        with:
-          server: ftp.bogsynth.com
-          username: trek-cd@bogsynth.com
-          password: ${{secrets.ftp_password}}
-          local-dir: ./dist/
-          server-dir: ./
-          port: 21
-      - name: retry2
-        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@master
         with:
           server: ftp.bogsynth.com
