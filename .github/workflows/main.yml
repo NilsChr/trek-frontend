@@ -39,5 +39,5 @@ jobs:
           username: trek-cd@bogsynth.com
           password: ${{secrets.ftp_password}}
           local-dir: ./dist/
-          server-dir: public_html/trek/
+          server-dir: .
           port: 21
