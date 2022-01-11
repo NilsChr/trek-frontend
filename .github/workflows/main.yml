@@ -43,7 +43,6 @@ jobs:
           server-dir: ./
           port: 21
       - name: retry1
-        if: steps.upload.outcome=='failure'
         continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@master
         with:
@@ -54,7 +53,6 @@ jobs:
           server-dir: ./
           port: 21
       - name: retry2
-        if: steps.retry1.outcome=='failure'
         continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@master
         with:
