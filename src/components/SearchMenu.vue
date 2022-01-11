@@ -1,7 +1,6 @@
 <template>
   <v-card height="100%" :dark="darkmode">
-    <error-500 v-if="error" />
-    <v-layout column justify-space-between fill-height v-else>
+    <v-layout column justify-space-between fill-height>
       <v-layout column>
         <v-flex xs2>
           <v-col cols="12">
@@ -23,9 +22,10 @@
         </v-flex>
         <via-routes />
       </v-layout>
+
       <v-layout column justify-end align-end>
-         <v-flex xs2>
-          <error-500 v-if="error"/>
+        <v-flex xs2>
+          <error-500 v-if="error" />
         </v-flex>
         <v-flex xs1>
           <v-layout size="2">
