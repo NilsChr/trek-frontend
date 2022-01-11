@@ -51,3 +51,4 @@ jobs:
           ftp-server: bogsynth.com
           fpt-username: trek-cd@bogsynth.com
           ftp-password: ${{secrets.ftp_password}}
+          server-dir: /temp
