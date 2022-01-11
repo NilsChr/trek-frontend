@@ -35,6 +35,6 @@ jobs:
       - name: sync Files to hosting
         uses: airvzxf/ftp-deployment-action@latest
         with:
-          server: ftp://bogsynth.com:22
+          server: bogsynth.com
           username: trek-cd@bogsynth.com
           password: ${{secrets.ftp_password}}
