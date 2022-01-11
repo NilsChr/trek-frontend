@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Hello world action step
         id: hello
-        uses: NilsChr/first-github-action@v1.1
+        uses: NilsChr/first-github-action
         with:
           who-to-greet: 'Mona the Octocat'
       # Use the output from the `hello` step
@@ -19,6 +19,7 @@ jobs:
         run: echo "The time was ${{ steps.hello.outputs.time }}"
   build:
     name: Build
+    needs: hello_world_job
     runs-on: ubuntu-latest
     steps:
       - name: Checkout respository
