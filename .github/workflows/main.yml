@@ -49,6 +49,6 @@ jobs:
         uses:  NilsChr/ftp-action@v1.0
         with:
           ftp-server: bogsynth.com
-          fpt-username: trek-cd@bogsynth.com
+          ftp-username: trek-cd@bogsynth.com
           ftp-password: ${{secrets.ftp_password}}
           server-dir: /temp
