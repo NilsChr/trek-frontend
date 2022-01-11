@@ -46,9 +46,8 @@ jobs:
           name: dist
           path: dist
       - name: sync Files to hosting
-        uses: SamKirkland/FTP-Deploy-Action@4.1.0
+        uses:  NilsChr/ftp-action@v1.0
         with:
-          server: bogsynth.com
-          port: 22
-          username: trek-cd@bogsynth.com
-          password: ${{secrets.ftp_password}}
+          ftp-server: bogsynth.com
+          fpt-username: trek-cd@bogsynth.com
+          ftp-password: ${{secrets.ftp_password}}
