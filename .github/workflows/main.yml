@@ -33,8 +33,8 @@ jobs:
           name: dist
           path: dist
       - name: sync Files to hosting
-        uses: kevinpainchaud/simple-ftp-deploy-action@v1.2.1
+        uses: SamKirkland/FTP-Deploy-Action@4.1.0
         with:
-          ftp_host: bogsynth.com:22
-          ftp_username: trek-cd@bogsynth.com
-          ftp_password: ${{secrets.ftp_password}}
+          server: bogsynth.com:22
+          username: trek-cd@bogsynth.com
+          password: ${{secrets.ftp_password}}
