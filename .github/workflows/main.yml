@@ -1,0 +1,43 @@
+name: Build and deploy
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+  
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout respository
+        uses: actions/checkout@master
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build dependencies
+        run: npm run build
+      - name: Archive production artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: dist
+          path: dist
+  deploy: 
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+      - name: Download artifact
+        uses: actions/download-artifact@master
+        with:
+          name: dist
+          path: dist
+      - name: sync Files to hosting
+        uses: SamKirkland/FTP-Deploy-Action@master
+        with:
+          server: ftp.bogsynth.com
+          username: trek-cd@bogsynth.com
+          password: ${{secrets.ftp_password}}
+          local-dir: ./dist/
+          server-dir: ./
+          port: 21
