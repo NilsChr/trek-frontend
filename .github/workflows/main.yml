@@ -16,7 +16,7 @@ jobs:
       - name: Build dependencies
         run: npm run build
       - name: Archive production artifact
-        uses: actions/upload-artiact@master
+        uses: actions/upload-artifact@master
         with:
           name: dist
           path: dist
