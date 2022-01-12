@@ -1,21 +1,27 @@
-<template>
-</template>
+<template></template>
 
 <script>
+import TREK_API from "../services/trekApi";
+
 export default {
-  mounted() {
+  async mounted() {
     let token = this.$route.query.jwt;
     console.log(token);
     if (!token) {
       console.log("no token?");
-    } else {
-      console.log("storing token");
-      // TODO: check if token valid. Backend should have /user/is_authenticated endpoint
-      window.localStorage.setItem("trekToken", token);
-      let user_data_page = location.origin + "/#/me";
-      console.log("redirecting to " + user_data_page)
-      location.href = user_data_page
+      return;
     }
+    let is_authenticated = await TREK_API.isAuthenticated({ token: token });
+    console.log(is_authenticated);
+    if (!is_authenticated) {
+      console.log("token from query invalid");
+      return;
+    }
+    console.log("storing token");
+    window.localStorage.setItem("trekToken", token);
+    let user_data_page = location.origin + "/#/me";
+    console.log("redirecting to " + user_data_page);
+    location.href = user_data_page;
   },
 };
 </script>

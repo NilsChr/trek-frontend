@@ -93,8 +93,31 @@ const TREK_API = {
       }
     });
   },
+  isAuthenticated: function ({ token = null }) {
+    // checks user authentication. Either with passed token, or token from localstorage
+    if (token === null) {
+      token = localStorage.getItem("trekToken");
+    }
+    if (!token) {
+      console.log("not logged in");
+      return false;
+    }
+    return new Promise(async (resolve, reject) => {
+      try {
+        let res = await axios.get(url + "/user/is_authenticated", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(async (response) => response.status === 200);
+        resolve(res);
+      } catch (e) {
+        // todo: check status code of failed request
+        resolve(false);
+      }
+    });
+  },
   getUserData: function () {
-    let token = localStorage.getItem("trekToken");
+    let token = localStorage.getItem("trekToken"); // TODO refactor into function and put somewhere nice
     if (!token) {
       console.log("not logged in");
       return;
