@@ -2,33 +2,16 @@
   <v-layout fill-height justify-center align-center column>
     <v-flex xs3>
       <v-layout justify-center align-center>
-        <v-img
-          :src="require('../assets/trek-logo.svg')"
-          class="my-3"
-          contain
-          height="200"
-          width="200"
-        />
+        <v-img :src="require('../assets/trek-logo.svg')" class="my-3" contain height="200" width="200" />
       </v-layout>
     </v-flex>
     <v-flex xs4>
       <v-layout align-center wrap justify-center>
-        <v-flex xs12 class="ma-5"  style="text-align:center;">
+        <v-flex xs12 class="ma-5" style="text-align:center;">
           <label>Sign in to continue</label>
         </v-flex>
-        <v-flex
-          class="ma-1"
-          xs7
-          v-for="tracker in trackers"
-          :key="tracker.name"
-        >
-          <v-btn
-            :color="tracker.color"
-            @click="login(tracker.name)"
-            dark
-            block
-            elevation="0"
-          >
+        <v-flex class="ma-1" xs7 v-for="tracker in trackers" :key="tracker.name">
+          <v-btn :color="tracker.color" @click="login(tracker)" dark block elevation="0">
             {{ tracker.name }}
           </v-btn>
         </v-flex>
@@ -41,23 +24,28 @@
 
 <script>
 import TREK_API from "../services/trekApi";
+import trackers from "../services/trackers";
 
 export default {
+  props: {
+    targetUrl: String
+  },
   data() {
     return {
-      trackers: [
-        { name: "fitbit", color: "#0095b2" },
-        { name: "withings", color: "#49a9ec" },
-        { name: "google fit", color: "#377ab5" },
-        { name: "polar", color: "#dd4e4a" },
-      ],
+      trackers: trackers,
     };
   },
   methods: {
-    async login(tracker_name) {
-      let redirect_url = await TREK_API.getAuthorizationUrl(tracker_name);
-      console.log(redirect_url);
-      location.href = redirect_url;
+    async login(tracker) {
+      let handleRedirectRoute = this.targetUrl ?
+        this.$router.resolve({ name: "TrekRedirect", query: { targetUrl: this.targetUrl } }) :
+        this.$router.resolve({ name: "TrekRedirect" })
+      console.log(handleRedirectRoute)
+      let handleRedirectUrl = window.location.origin + "/" + handleRedirectRoute.href
+      console.log(handleRedirectUrl)
+      let trackerRedirectUrl = await TREK_API.getLoginUrl(tracker.id, handleRedirectUrl);
+      console.log(trackerRedirectUrl);
+      location.href = trackerRedirectUrl;
     },
   },
 };
@@ -91,6 +79,7 @@ export default {
   height: 30%;
   clip-path: polygon(0% 0%, 100% 0%, 0% 100%);
 }
+
 #flavor-bot {
   background-color: #0095b2;
   position: absolute;

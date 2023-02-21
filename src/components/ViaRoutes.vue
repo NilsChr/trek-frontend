@@ -1,55 +1,46 @@
 <template>
   <v-layout column align-center id="destination-list">
-    <v-flex
-      xs1
-      class="ml-1 mr-1 mt-0 mb-0"
-      v-for="(item, i) in list"
-      :key="item.id"
-      style="width: 90%"
-    >
-      <v-layout v-if="!item.isAdder">
-        <search-location
-          :placeholder="item.placeholder"
-          @change="handleChange($event, i)"
-          :disabled="loadingRoute"
-          :model="item.value"
-        />
-        <v-checkbox
-          class="ma-0 ml-1 mt-1"
-          v-if="i != 0 && i != list.length - 1"
-          v-model="item.skip"
-          @change="updateMap"
-          dense
-        >
-        </v-checkbox>
-        <v-btn
-          class="ma-0 mt-3 deleter"
-          fab
-          x-small
-          color="grey lighten-4"
-          plain
-          :elevation="1"
-          @click="collapse(i)"
-          :dark="darkmode"
-          v-if="i != 0 && i != list.length - 1"
-        >
+
+    <v-flex xs1 class="ml-1 mr-1 mt-0 mb-0" style="width: 90%">
+      <v-layout>
+        <search-location placeholder="Origin" :disabled="originIsFixed || loadingRoute" :isOrigin="true" :index="0" />
+      </v-layout>
+      <v-layout justify-center>
+        <v-btn class="mt-2 mb-2 adder mr-6" fab x-small color="primary lighten-2" :plain="!originIsSkip"
+          :elevation="1" @click="toggleSkipOrigin()">
+          <v-icon> mdi-airplane </v-icon>
+        </v-btn>
+        <v-btn class="mt-2 mb-2 adder" fab x-small color="grey lighten-4" plain :elevation="1" @click="addBox(0)"
+          :dark="darkmode">
+          <v-icon> mdi-plus </v-icon>
+        </v-btn>
+      </v-layout>
+    </v-flex>
+
+    <v-flex xs1 class="ml-1 mr-1 mt-0 mb-0" v-for="(item, i) in viaList" :key="item.id" style="width: 90%">
+      <v-layout>
+        <search-location placeholder="Via" :disabled="loadingRoute" :index="i" />
+        <v-btn class="ma-0 mt-3 deleter" fab x-small color="grey lighten-4" plain :elevation="1" @click="removeBox(i)"
+          :dark="darkmode">
           <v-icon> mdi-close </v-icon>
         </v-btn>
       </v-layout>
-
-      <v-layout v-if="item.isAdder" justify-center>
-        <v-btn
-          class="mt-2 mb-2 adder"
-          fab
-          x-small
-          color="grey lighten-4"
-          plain
-          :elevation="1"
-          @click="expand(i)"
-          :dark="darkmode"
-        >
+      <v-layout justify-center>
+        <v-btn class="mt-2 mb-2 adder mr-6" fab x-small color="primary lighten-2" :plain="!viaList[i].skip"
+          :elevation="1" @click="toggleSkipVia(i)">
+          <v-icon> mdi-airplane </v-icon>
+        </v-btn>
+        <v-btn class="mt-2 mb-2 adder" fab x-small color="grey lighten-4" plain :elevation="1" @click="addBox(i + 1)"
+          :dark="darkmode">
           <v-icon> mdi-plus </v-icon>
         </v-btn>
+      </v-layout>
+    </v-flex>
+
+
+    <v-flex xs1 class="ml-1 mr-1 mt-0 mb-0" style="width: 90%">
+      <v-layout>
+        <search-location placeholder="Destination" :disabled="loadingRoute" :isDestination="true" />
       </v-layout>
     </v-flex>
   </v-layout>
@@ -57,107 +48,50 @@
 
 <script>
 import SearchLocation from "./SearchLocation.vue";
-import TREK_API from "../services/trekApi";
 
 export default {
   components: { SearchLocation },
   data() {
     return {
       ids: 1,
-      list: [],
       searchInterval: null,
       isLoading: false,
     };
   },
   methods: {
-    getDestination(title = null, isAdder = false) {
-      return {
-        id: this.ids++,
-        isAdder: isAdder,
-        value: null,
-        placeholder: title,
-        search: "",
-        items: [],
-        skip: false,
-      };
+    addBox(index) {
+      this.$store.dispatch("ADD_VIA_BOX", index)
     },
-    collapse(index) {
-      this.list.splice(index, 1);
-      this.list.splice(index, 1);
-      this.updateMap();
-    },
-    expand(index) {
-      this.list[index].isAdder = false;
-      this.list[index].placeholder = "via";
+    removeBox(index) {
+      this.$store.dispatch("REMOVE_VIA_BOX", index)
+      this.$store.dispatch("LOAD_ROUTE");
 
-      this.list.splice(index, 0, {
-        id: this.ids++,
-        isAdder: true,
-        value: null,
-      });
-      this.list.splice(index + 2, 0, {
-        id: this.ids++,
-        isAdder: true,
-        value: null,
-      });
     },
-    search(item) {
-      if (item.search == "") return;
-      let that = this;
-      clearInterval(this.searchInterval);
-      this.searchInterval = setTimeout(async function () {
-        that.isLoading = true;
-        if (item.search == "") return;
-        that.isLoading = false;
-        item.items = await TREK_API.getLocations(item.search);
-      }, 300);
-    },
-    updateMap() {
-      let viaList = [];
-      for (let i = 0; i < this.list.length - 1; i++) {
-        if (i === 0) continue;
-        if (this.list[i].isAdder) continue;
-        let item = { ...this.list[i].value };
-        item.skip = this.list[i].skip;
-        viaList.push(item);
-      }
-      this.$store.commit("SET_VIA_LIST", viaList);
+    toggleSkipOrigin() {
+      this.$store.dispatch("TOGGLE_SKIP_ORGIN")
       this.$store.dispatch("LOAD_ROUTE");
     },
-    handleChange(event, i) {
-      if (!event && i === 0) {
-        this.$store.commit("SET_ORIGIN", null);
-        return;
-      }
-      if (!event && this.list.length - 1) {
-        this.$store.commit("SET_DESTINATION", null);
-        return;
-      }
-
-      this.list[i].value = event;
-      if (i == 0) {
-        this.$store.commit("SET_ORIGIN", [event.longitude, event.latitude]);
-      } else if (i == this.list.length - 1) {
-        this.$store.commit("SET_DESTINATION", [
-          event.longitude,
-          event.latitude,
-        ]);
-      }
-      this.updateMap();
-    },
+    toggleSkipVia(index) {
+      this.$store.dispatch("TOGGLE_SKIP_VIA_SEGMENT", index)
+      this.$store.dispatch("LOAD_ROUTE");
+    }
   },
   computed: {
+    viaList() {
+      return this.$store.state.viaList;
+    },
+    originIsFixed() {
+      return this.$store.state.origin.isFixed;
+    },
+    originIsSkip() {
+      return this.$store.state.origin.skip;
+    },
     loadingRoute() {
       return this.$store.state.loadingRoute;
     },
     darkmode() {
       return this.$store.state.darkmode;
     },
-  },
-  created() {
-    this.list.push(this.getDestination("Origin", false));
-    this.list.push(this.getDestination("", true));
-    this.list.push(this.getDestination("Destination", false));
   },
 };
 </script>
@@ -173,14 +107,17 @@ export default {
   height: 1.8em !important;
   transition: all 0.5s ease;
 }
+
 .adder * {
   color: black !important;
 }
+
 .adder:hover {
   background-color: rgb(73, 138, 208);
   animation: bounce 0.2s;
   animation-fill-mode: forwards;
 }
+
 .adder:hover * {
   color: white;
 }
@@ -190,14 +127,17 @@ export default {
   height: 1.8em !important;
   transition: all 0.5s ease;
 }
+
 .deleter * {
   color: black !important;
 }
+
 .deleter:hover {
   background-color: rgb(208, 73, 73);
   animation: bounce 0.2s;
   animation-fill-mode: forwards;
 }
+
 .deleter:hover * {
   color: white;
 }
@@ -206,9 +146,11 @@ export default {
   0% {
     transform: scale(1, 1);
   }
+
   70% {
     transform: scale(1.4, 1.4);
   }
+
   100% {
     transform: scale(1.3, 1.3);
   }

@@ -20,7 +20,7 @@
             />
           </v-col>
         </v-flex>
-        <via-routes />
+        <via-routes/>
       </v-layout>
 
       <v-layout column justify-end align-end>
@@ -50,26 +50,6 @@ import ViaRoutes from "./ViaRoutes.vue";
 
 export default {
   components: { SearchLocation, ViaRoutes, Error500 },
-  data() {
-    return {
-      origin: null,
-      destination: null,
-    };
-  },
-  methods: {
-    _handleOriginChange(e) {
-      if (!e) return;
-      this.origin = e;
-      this.$store.commit("SET_ORIGIN", [e.longitude, e.latitude]);
-      this.$store.dispatch("LOAD_ROUTE");
-    },
-    _handleDestinationChange(e) {
-      if (!e) return;
-      this.destination = e;
-      this.$store.commit("SET_DESTINATION", [e.longitude, e.latitude]);
-      this.$store.dispatch("LOAD_ROUTE");
-    },
-  },
   computed: {
     darkmode: {
       set(val) {
@@ -78,9 +58,6 @@ export default {
       get() {
         return this.$store.state.darkmode;
       },
-    },
-    loadingRoute() {
-      return this.$store.state.loadingRoute;
     },
     error() {
       return this.$store.state.error;

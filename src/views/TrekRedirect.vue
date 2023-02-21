@@ -4,6 +4,10 @@
 import TREK_API from "../services/trekApi";
 
 export default {
+  props: {
+    targetUrl: String
+  },
+
   async mounted() {
     let token = this.$route.query.jwt;
     console.log(token);
@@ -11,28 +15,22 @@ export default {
       console.log("no token?");
       return;
     }
-    let is_authenticated = await TREK_API.isAuthenticated({ token: token });
-    console.log(is_authenticated);
-    if (!is_authenticated) {
+    try {
+      TREK_API.checkTokenValid(token)
+      TREK_API.storeToken(token)
+      this.$store.commit("SET_TREK_API_TOKEN", token)
+    } catch {
       console.log("token from query invalid");
       return;
     }
-    console.log("storing token");
-    window.localStorage.setItem("trekToken", token);
-    let user_data_page = location.origin + "/#/me";
-    console.log("redirecting to " + user_data_page);
-    location.href = user_data_page;
+    if (this.targetUrl) {
+      console.log("sending to" + this.targetUrl)
+      location.href = this.targetUrl;
+    } else {
+      console.log("sending home")
+      this.$router.push({ "name": "me" })
+    }
   },
 };
 </script>
-
-<style >
-#menu {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 100%;
-  height: 90%;
-}
-</style>
 

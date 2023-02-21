@@ -1,18 +1,60 @@
 <template>
-  <div id="map-container"></div>
+  <div>
+
+
+    <v-menu v-model="showMenu" :position-x="menuX" :position-y="menuY" absolute offset-y>
+      <v-list>
+        <v-list-item v-if="!originIsFixed" @click="addCtxStart">
+          <v-list-item-title>Set as origin</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="addCtxVia">
+          <v-list-item-title>Via</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="addCtxDestination">
+          <v-list-item-title>Set as destination</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+    <div id="map-container"></div>
+  </div>
 </template>
 
 <script>
 import Mapbox from "mapbox-gl";
+import polyline from '@mapbox/polyline';
+import Vue from 'vue'
+
+const LINE_STYLE = {
+  layout: {
+    "line-join": "round",
+    "line-cap": "round",
+  },
+  paint: {
+    "line-color": "#888",
+    "line-width": 3,
+  },
+}
+
+
+function nameForLatLng(lat, lng) {
+  return `${lat.toFixed(2)}, ${lng.toFixed(2)}`
+}
 
 export default {
+  props: {
+    addContextMenu: { type: Boolean, default: true }
+  },
   data() {
     return {
+      showMenu: false,
+      menuX: 0,
+      menuY: 0,
       map: null,
       styleLight: "mapbox://styles/mapbox/streets-v11",
       styleDark: "mapbox://styles/mapbox/dark-v10",
       originMarker: null,
       destinationMarker: null,
+      viaMarkers: []
     };
   },
   methods: {
@@ -29,30 +71,114 @@ export default {
           center: [0, 0],
           zoom: 2,
         });
+        // disable map rotation using right click + drag
+        that.map.dragRotate.disable();
+        // disable map rotation using touch rotation gesture
+        that.map.touchZoomRotate.disableRotation();
+
         that.map.on("load", function () {
           resolve();
         });
+        if (this.addContextMenu) {
+          that.map.on('contextmenu', function (e) {
+            e.preventDefault()
+            that.menuX = e.point.x
+            that.menuY = e.point.y
+            that.menuItem = {
+              lat: e.lngLat.lat,
+              lng: e.lngLat.lng,
+              value: nameForLatLng(e.lngLat.lat, e.lngLat.lng)
+            }
+            Vue.nextTick(() => {
+              that.showMenu = true
+            })
+          });
+        }
       });
     },
     setOriginMarker() {
-      if (this.origin === null) return;
-
-      this.originMarker = new Mapbox.Marker({
+      if (this.origin.value === null) return;
+      console.log(this.origin.value)
+      const marker = new Mapbox.Marker({
         color: "#befbeb",
-        draggable: true,
+        draggable: !this.originIsFixed,
       })
-        .setLngLat([this.origin[0], this.origin[1]])
+        .setLngLat([this.origin.lng, this.origin.lat])
         .addTo(this.map);
+      marker.on("dragend", () => {
+        const { lng, lat } = marker.getLngLat();
+        const item = {
+          lat: lat,
+          lng: lng,
+          value: nameForLatLng(lat, lng)
+        }
+        this.$store.dispatch("CHANGE_ORIGIN", item);
+        this.$store.dispatch("LOAD_ROUTE");
+      })
+      this.originMarker = marker
     },
     setDestinationMarker() {
-      if (this.destination === null) return;
+      if (this.destination.value === null) return;
 
-      this.destinationMarker = new Mapbox.Marker({
+      const marker = new Mapbox.Marker({
         color: "#f23f5a",
         draggable: true,
       })
-        .setLngLat([this.destination[0], this.destination[1]])
+        .setLngLat([this.destination.lng, this.destination.lat])
         .addTo(this.map);
+      marker.on("dragend", () => {
+        const { lng, lat } = marker.getLngLat();
+        const item = {
+          lat: lat,
+          lng: lng,
+          value: nameForLatLng(lat, lng)
+        }
+        this.$store.commit("SET_DESTINATION", item);
+        this.$store.dispatch("LOAD_ROUTE");
+      })
+      this.destinationMarker = marker
+    },
+    setViaMarkers() {
+      const markers = []
+      this.viaList.forEach((point, i) => {
+        if (point.value === null) {
+          return
+        }
+        const marker = new Mapbox.Marker({
+          color: "#888",
+          draggable: true,
+        })
+          .setLngLat([point.lng, point.lat])
+          .addTo(this.map);
+        marker.on("dragend", () => {
+          const { lng, lat } = marker.getLngLat();
+          const item = {
+            lat: lat,
+            lng: lng,
+            value: nameForLatLng(lat, lng)
+          }
+          this.$store.dispatch("SET_VIA_BOX", { index: i, item: item })
+          this.$store.dispatch("LOAD_ROUTE");
+        })
+        markers.push(marker)
+      })
+      this.viaMarkers = markers
+    },
+    addCtxStart() {
+      this.$store.dispatch("CHANGE_ORIGIN", this.menuItem);
+      this.$store.dispatch("LOAD_ROUTE");
+
+    },
+    addCtxVia() {
+      const index = this.$store.state.viaList.length
+      this.$store.dispatch("ADD_VIA_BOX", index)
+      this.$store.dispatch("SET_VIA_BOX", { index: index, item: this.menuItem })
+      this.$store.dispatch("LOAD_ROUTE");
+    },
+    addCtxDestination() {
+      this.$store.commit("SET_DESTINATION", this.menuItem);
+      this.$store.dispatch("LOAD_ROUTE");
+
     },
     clearRoute() {
       const source = this.map.getSource("route");
@@ -64,19 +190,12 @@ export default {
     buildRoute() {
       this.clearRoute();
       if (!this.route) return;
-      this.map.addSource("route", this.route);
+      this.map.addSource("route", this.route.geojson);
       this.map.addLayer({
         id: "route",
         type: "line",
         source: "route",
-        layout: {
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        paint: {
-          "line-color": "#888",
-          "line-width": 3,
-        },
+        ...LINE_STYLE
       });
     },
     panToRoute() {
@@ -85,6 +204,32 @@ export default {
         padding: { top: 100, bottom: 50, left: 350, right: 150 },
       });
     },
+    addFinishedLegs() {
+      this.finishedLegs.map(leg => {
+        const geojson = polyline.toGeoJSON(leg.polyline);
+        console.log("polyline", { type: 'geojson', data: geojson })
+        this.map.on("load", () => {
+          this.map.addSource(leg.leg.id, { type: 'geojson', data: geojson });
+          this.map.addLayer({
+            id: leg.leg.id + "layer",
+            type: 'line',
+            source: leg.leg.id,
+            ...LINE_STYLE
+          });
+          new Mapbox.Marker({ color: "#888", draggable: false })
+            .setLngLat([leg.start.lon, leg.start.lat])
+            .addTo(this.map);
+          // TODO zoom is not on relevant point
+          this.map.flyTo({
+            center: [leg.start.lon, leg.start.lat],
+            zoom: 8,
+            duration: 1000,
+            essential: true // This animation is considered essential with
+            //respect to prefers-reduced-motion
+          });
+        });
+      })
+    }
   },
   computed: {
     origin() {
@@ -102,12 +247,22 @@ export default {
     bbox() {
       return this.$store.state.bbox;
     },
+    finishedLegs() {
+      return this.$store.state.finishedLegs;
+    },
+    originIsFixed() {
+      return this.$store.state.origin.isFixed;
+    },
+    viaList() {
+      return this.$store.state.viaList;
+    },
   },
   watch: {
     origin() {
       if (this.originMarker) {
         this.originMarker.remove();
       }
+      console.log("origin watch")
       this.clearRoute();
       this.setOriginMarker();
     },
@@ -131,6 +286,14 @@ export default {
       this.buildRoute();
       this.panToRoute();
     },
+    finishedLegs() {
+      this.addFinishedLegs()
+    },
+    viaList() {
+      this.viaMarkers.forEach(marker => marker.remove())
+      this.clearRoute();
+      this.setViaMarkers()
+    }
   },
   mounted() {
     Mapbox.accessToken =

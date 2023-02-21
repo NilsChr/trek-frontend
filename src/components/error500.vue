@@ -109,9 +109,7 @@
         </svg>
       </v-flex>
       <v-flex xs12 class="pa-4" style="text-align: center; font-size: 0.9em">
-        <label>Ops!</label>
-        <p>We are having some technical difficulties</p>
-        <p>But we are walking on them</p>
+        <p>{{error}}</p>
       </v-flex>
       <v-flex xs12>
         <v-btn color="primary" small block depressed @click="resetError">Ok</v-btn>

@@ -2,33 +2,25 @@ import axios from "axios";
 import store from "../store/index";
 
 const TOKEN_NAME = "trekToken"
-function longLatToParams(longLtd) {
-  return longLtd[1] + "," + longLtd[0];
+function longLatToParams(item) {
+  return item.lat + "," + item.lng;
 }
 
 function sanitizeLocation(location) {
-  if(!location) return '';
-  location = location.replaceAll(/æ/g, "ae");
-  location = location.replaceAll(/ø/g, "o");
-  location = location.replaceAll(/å/g, "aa");
-  location = location.replaceAll(/ö/g, "o");
-  location = location.replaceAll(/ä/g, "a");
+  if (!location) return '';
   return location;
 }
 
 
 function loadToken() {
-  let token = localStorage.getItem(TOKEN_NAME);
-  if (!token) {
-    throw new Error("not logged in");
-
-  } else {
-    return token
-  }
+  return localStorage.getItem(TOKEN_NAME);
 }
 
 function getAuthHeader() {
-  let token = loadToken()
+  let token = store.state.trekApiToken
+  if (token === null) {
+    throw new Error("not logged in");
+  }
   return {
     Authorization: `Bearer ${token}`,
   }
@@ -36,14 +28,16 @@ function getAuthHeader() {
 
 const url =
   process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
+    ? "http://localhost:8000"
     : "https://trek-api.eirik.dev";
+
+
 
 const TREK_API = {
   getLocations: function (location) {
     return new Promise(async (resolve, reject) => {
       try {
-        if(!location) return resolve([]);
+        if (!location) return resolve([]);
         const params = new URLSearchParams();
         params.append("query", sanitizeLocation(location));
         let res = await axios.get(url + "/search/locations?" + params);
@@ -60,50 +54,51 @@ const TREK_API = {
   getRoute: function () {
     return new Promise(async (resolve, reject) => {
       try {
+        if (store.state.origin.value === null)
+          return reject();
+        if (store.state.destination.value === null)
+          return reject();
         let parsed = [];
         parsed.push(["start", longLatToParams(store.state.origin)]);
         parsed.push(["stop", longLatToParams(store.state.destination)]);
 
-        if (store.state.origin[0] === 0 && store.state.origin[1] === 0)
-          return reject();
-        if (
-          store.state.destination[0] === 0 &&
-          store.state.destination[1] === 0
-        )
-          return reject();
+        const nonEmptyViaPoints = store.state.viaList.filter(item => item.value !== null)
+        nonEmptyViaPoints.forEach(point => parsed.push(["via", longLatToParams(point)]))
 
-        for (let i = 0; i < store.state.viaList.length; i++) {
-          let destination = [
-            store.state.viaList[i]?.longitude,
-            store.state.viaList[i]?.latitude,
-          ];
-          if (destination[0] === 0 || destination[1] === 0) continue;
-          parsed.push(["via", longLatToParams(destination)]);
-          if (store.state.viaList[i].skip) {
-            parsed.push(["skip_segments", i + 1]);
-          }
+        if (store.state.origin.skip) {
+          parsed.push(["skip_segments", 1])
         }
+        nonEmptyViaPoints.forEach((point, index) => {
+          if (point.skip) {
+            parsed.push(["skip_segments", index + 2])
+          }
+        })
         const params = new URLSearchParams([...parsed]);
         let res = await axios.get(url + "/search/route?" + params);
         resolve(res);
       } catch (e) {
-        store.commit(
-          "SET_ERROR",
-          "Ops!A server error occured, while we are fixing it. Take a walk"
-        );
+        let errorMessage
+        if (e?.response?.data?.error_code === "E301SearchAPIError" && e?.response?.data?.description) {
+          errorMessage = e.response.data.description
+        } else if (e?.response?.data?.error_code === "E302NoRouteFound") {
+          errorMessage = "No route found for those locations"
+        } else if (e?.response?.data?.error_code === "E303RouteTooLong") {
+          errorMessage = "Route too long"
+        } else {
+          errorMessage = "Ops! A server error occured. While we are fixing it: take a walk"
+        }
+        store.commit("SET_ERROR", errorMessage);
         reject(e);
       }
     });
   },
-  getAuthorizationUrl: function (tracker_name) {
+
+  getLoginUrl: function (trackerName, originalUrl) {
     return new Promise(async (resolve, reject) => {
       try {
-        let backend_url = new URL("/user/auth/" + tracker_name, url);
-        backend_url.searchParams.set(
-          "redirect_url",
-          location.href.replace("/login", "/redirect")
-        );
-        let res = await axios.get(backend_url);
+        let requestUrl = new URL("/user/login/" + trackerName, url);
+        requestUrl.searchParams.set("frontend_redirect_url", originalUrl);
+        let res = await axios.get(requestUrl);
         resolve(res.data.auth_url);
       } catch (e) {
         console.log("error!");
@@ -112,15 +107,43 @@ const TREK_API = {
       }
     });
   },
-  isAuthenticated: function ({ token = null }) {
-    // checks user authentication. Either with passed token, or token from localstorage
+  getAddTrackerUrl: function (trackerName, originalUrl) {
+    let header = getAuthHeader()
+    return new Promise(async (resolve, reject) => {
+      try {
+        let requestUrl = new URL("/user/add_tracker/" + trackerName, url);
+        requestUrl.searchParams.set("frontend_redirect_url", originalUrl);
+        let res = await axios.get(requestUrl, { headers: header });
+        resolve(res.data.auth_url);
+      } catch (e) {
+        console.log("error!");
+        console.log(e);
+        reject(e);
+      }
+    });
+  },
+  storeToken: function (token) {
+    localStorage.setItem(TOKEN_NAME, token);
+  },
+  isAuthenticated: async function () {
+    console.log("isAuthenticated")
+    if (store.state.trekApiToken !== null) {
+      console.log("token in state")
+      return true
+    }
+    let token = loadToken();
     if (token === null) {
-      token = localStorage.getItem("trekToken");
+      console.log("no token in localstorage")
+      return false
     }
-    if (!token) {
-      console.log("not logged in");
-      return false;
+    const isValid = await this.checkTokenValid(token)
+    if (!isValid) {
+      return false
     }
+    store.commit("SET_TREK_API_TOKEN", token)
+    return true
+  },
+  checkTokenValid: function (token) {
     return new Promise(async (resolve, reject) => {
       try {
         let res = await axios.get(url + "/user/is_authenticated", {
@@ -130,10 +153,11 @@ const TREK_API = {
         }).then(async (response) => response.status === 200);
         resolve(res);
       } catch (e) {
-        // todo: check status code of failed request
+        console.log("failed")
+        // TODO: check status code of failed request
         resolve(false);
       }
-    });
+    })
   },
   getUserData: function () {
     let header = getAuthHeader()
@@ -148,19 +172,43 @@ const TREK_API = {
       }
     });
   },
-  addTrek(origin, destination, waypoints) {
+  editUser(data) {
+    console.log(data)
+    let header = getAuthHeader()
+    return new Promise(async (resolve, reject) => {
+      try {
+        let res = await axios.put(url + `/user/me`, data, { headers: header });
+        resolve();
+      } catch (e) {
+        console.log("error!");
+        console.log(e);
+        reject(e);
+      }
+    })
+  },
+  getTrekData: function (trekId) {
+    let header = getAuthHeader()
+    return new Promise(async (resolve, reject) => {
+      try {
+        let res = await axios.get(url + "/trek/" + trekId, { headers: header });
+        resolve(res.data);
+      } catch (e) {
+        console.log("error!");
+        console.log(e);
+        reject(e);
+      }
+    });
+  },
+  addTrek(polyline) {
     let header = getAuthHeader()
     let payload = {
-      origin: origin,
-      destination: destination,
-      waypoints: waypoints,
+      polyline: polyline,
     }
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.post(url + "/trek/", { headers: header, data: payload });
+        let res = await axios.post(url + "/trek", payload, { headers: header });
         resolve({
-          trekId: res.trek_id,
-          legId: res.leg_id,
+          trekId: res.data.trek_id,
         });
       } catch (e) {
         console.log("error!");
@@ -169,17 +217,29 @@ const TREK_API = {
       }
     })
   },
-  addLegToTrek(trekId, destination, waypoints) {
+  editTrek(trekId, data) {
+    let header = getAuthHeader()
+    return new Promise(async (resolve, reject) => {
+      try {
+        let res = await axios.put(url + `/trek/${trekId}`, data, { headers: header });
+        resolve();
+      } catch (e) {
+        console.log("error!");
+        console.log(e);
+        reject(e);
+      }
+    })
+  },
+  addLeg(trekId, polyline) {
     let header = getAuthHeader()
     let payload = {
-      destination: destination,
-      waypoints: waypoints,
+      polyline: polyline,
     }
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.post(url + `/trek/${trekId}`, { headers: header, data: payload });
+        let res = await axios.post(url + `/trek/${trekId}/leg`, payload, { headers: header });
         resolve({
-          legId: res.leg_id,
+          legId: res.data.leg_id,
         });
       } catch (e) {
         console.log("error!");
@@ -187,6 +247,19 @@ const TREK_API = {
         reject(e);
       }
     })
+  },
+  getLegData: function (trekId, legId) {
+    let header = getAuthHeader()
+    return new Promise(async (resolve, reject) => {
+      try {
+        let res = await axios.get(`${url}/trek/${trekId}/leg/${legId}`, { headers: header });
+        resolve(res.data);
+      } catch (e) {
+        console.log("error!");
+        console.log(e);
+        reject(e);
+      }
+    });
   },
   getInviteId: function (trekId) {
     /**
@@ -196,8 +269,8 @@ const TREK_API = {
     let header = getAuthHeader()
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.get(url + `/trek/invite/${trekId}`, { headers: header });
-        resolve(res.invite_id);
+        let res = await axios.get(url + `/trek/${trekId}/invitation`, { headers: header });
+        resolve(res.data.invite_id);
       } catch (e) {
         console.log("error!");
         console.log(e);
@@ -212,8 +285,8 @@ const TREK_API = {
     let header = getAuthHeader()
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.get(url + `/trek/join/${inviteId}`, { headers: header });
-        resolve(res);
+        let res = await axios.post(url + `/trek/${inviteId}/join`, {}, { headers: header });
+        resolve(res.data.trek_id);
       } catch (e) {
         console.log("error!");
         console.log(e);
@@ -221,6 +294,22 @@ const TREK_API = {
       }
     });
   },
+  getAddToDiscordUrl(trekId, originalUrl) {
+    let header = getAuthHeader()
+    return new Promise(async (resolve, reject) => {
+      try {
+        let requestUrl = new URL(`/output/discord/add/${trekId}`, url);
+        requestUrl.searchParams.set("frontend_redirect_url", originalUrl);
+        let res = await axios.get(requestUrl, { headers: header });
+        resolve(res.data.url);
+      } catch (e) {
+        console.log("error!");
+        console.log(e);
+        reject(e);
+      }
+    });
+
+  }
 };
 
 export default TREK_API;
