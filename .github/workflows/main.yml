@@ -8,14 +8,14 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    env:
-      NODE_OPTIONS: --openssl-legacy-provider
     steps:
       - name: Checkout respository
         uses: actions/checkout@master
       - name: Install Dependencies
         run: npm ci
       - name: Build dependencies
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
         run: npm run build
       - name: Archive production artifact
         uses: actions/upload-artifact@master
