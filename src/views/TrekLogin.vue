@@ -41,7 +41,7 @@ export default {
         this.$router.resolve({ name: "TrekRedirect", query: { targetUrl: this.targetUrl } }) :
         this.$router.resolve({ name: "TrekRedirect" })
       console.log(handleRedirectRoute)
-      let handleRedirectUrl = window.location.origin + "/" + handleRedirectRoute.href
+      let handleRedirectUrl = window.location.origin + "/trek" + handleRedirectRoute.href
       console.log(handleRedirectUrl)
       let trackerRedirectUrl = await TREK_API.getLoginUrl(tracker.id, handleRedirectUrl);
       console.log(trackerRedirectUrl);
