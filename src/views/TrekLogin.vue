@@ -48,7 +48,7 @@ export default {
 
       const redirectBase = process.env.NODE_ENV === "development" ? "/" : "/trek";
 
-      const handleRedirectUrl = window.location.origin + redirectBase + handleRedirectRoute.href
+      const handleRedirectUrl = window.location.origin + "/trek" + handleRedirectRoute.href
       console.log(handleRedirectUrl)
       const trackerRedirectUrl = await TREK_API.getLoginUrl(tracker.id, handleRedirectUrl);
       console.log(trackerRedirectUrl);
