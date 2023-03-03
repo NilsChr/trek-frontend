@@ -19,12 +19,15 @@
     </v-flex>
     <div id="flavor-top"></div>
     <div id="flavor-bot"></div>
+    <div id="version">v.{{ appVersion }}</div>
   </v-layout>
 </template>
 
 <script>
 import TREK_API from "../services/trekApi";
 import trackers from "../services/trackers";
+import {version} from '../../package'
+
 
 export default {
   props: {
@@ -33,6 +36,7 @@ export default {
   data() {
     return {
       trackers: trackers,
+      appVersion:version
     };
   },
   methods: {
@@ -88,5 +92,12 @@ export default {
   width: 50%;
   height: 30%;
   clip-path: polygon(0% 100%, 100% 0%, 100% 100%);
+}
+
+#version {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  padding-right: 5px;
 }
 </style>
