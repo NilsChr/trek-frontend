@@ -71,7 +71,7 @@ router.beforeEach(async (to, from, next) => {
     let isAuthenticated = await TREK_API.isAuthenticated();
     if (!isAuthenticated) {
       console.log("redirect to login")
-      let targetUrl = window.location.origin + "/#" + to.fullPath
+      let targetUrl = window.location.origin + window.location.pathname + "#" + to.fullPath
       console.log("tohash", to)
       return next({ name: 'TrekLogin', query: { targetUrl: targetUrl } })
     }
