@@ -26,7 +26,7 @@
 <script>
 import TREK_API from "../services/trekApi";
 import trackers from "../services/trackers";
-import {version} from '../../package'
+import { version } from '../../package'
 
 
 export default {
@@ -36,18 +36,21 @@ export default {
   data() {
     return {
       trackers: trackers,
-      appVersion:version
+      appVersion: version
     };
   },
   methods: {
     async login(tracker) {
-      let handleRedirectRoute = this.targetUrl ?
+      const handleRedirectRoute = this.targetUrl ?
         this.$router.resolve({ name: "TrekRedirect", query: { targetUrl: this.targetUrl } }) :
         this.$router.resolve({ name: "TrekRedirect" })
       console.log(handleRedirectRoute)
-      let handleRedirectUrl = window.location.origin + "/trek" + handleRedirectRoute.href
+
+      const redirectBase = process.env.NODE_ENV === "development" ? "/" : "/trek";
+
+      const handleRedirectUrl = window.location.origin + redirectBase + handleRedirectRoute.href
       console.log(handleRedirectUrl)
-      let trackerRedirectUrl = await TREK_API.getLoginUrl(tracker.id, handleRedirectUrl);
+      const trackerRedirectUrl = await TREK_API.getLoginUrl(tracker.id, handleRedirectUrl);
       console.log(trackerRedirectUrl);
       location.href = trackerRedirectUrl;
     },
