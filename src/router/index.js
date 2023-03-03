@@ -60,7 +60,7 @@ const routes = [
 ];
 
 const router = new VueRouter({
-  // base: "/trek",
+  base: "/trek",
   routes
 });
 
