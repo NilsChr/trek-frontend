@@ -60,7 +60,7 @@ const routes = [
 ];
 
 const router = new VueRouter({
-  base: process.env.NODE_ENV === "development" ? "" : "/trek",
+  //base: process.env.NODE_ENV === "development" ? "" : "/trek",
   routes
 });
 
