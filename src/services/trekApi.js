@@ -300,7 +300,7 @@ const TREK_API = {
       try {
         let requestUrl = new URL(`/output/discord/add/${trekId}`, url);
         requestUrl.searchParams.set("frontend_redirect_url", originalUrl);
-        let res = await axios.get(requestUrl, { headers: header });
+        let res = await axios.post(requestUrl, {}, { headers: header });
         resolve(res.data.url);
       } catch (e) {
         console.log("error!");
