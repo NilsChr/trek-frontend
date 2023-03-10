@@ -58,11 +58,12 @@ export default {
     },
     onAddTracker(tracker) {
       console.log(tracker.id)
-      let targetUrl = window.location.href
+      const targetUrl = window.location.href
       console.log(targetUrl)
-      let handleRedirectRoute = this.$router.resolve({ name: "TrekRedirect", query: { targetUrl: targetUrl } })
+      const handleRedirectRoute = this.$router.resolve({ name: "TrekRedirect", query: { targetUrl: targetUrl } })
       console.log(handleRedirectRoute)
-      let handleRedirectUrl = window.location.origin + "/" + handleRedirectRoute.href
+      const redirectBase = process.env.NODE_ENV === "development" ? "/" : "/trek/";
+      const handleRedirectUrl = window.location.origin + redirectBase + handleRedirectRoute.href
       console.log(handleRedirectUrl)
       TREK_API.getAddTrackerUrl(tracker.id, handleRedirectUrl)
         .then(trackerRedirectUrl => location.href = trackerRedirectUrl);
