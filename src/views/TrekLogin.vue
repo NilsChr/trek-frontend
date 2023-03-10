@@ -46,7 +46,7 @@ export default {
         this.$router.resolve({ name: "TrekRedirect" })
       console.log(handleRedirectRoute)
 
-      const redirectBase = process.env.NODE_ENV === "development" ? "/" : "/trek";
+      const redirectBase = process.env.NODE_ENV === "development" ? "/" : "/trek/";
 
       const handleRedirectUrl = window.location.origin + redirectBase + handleRedirectRoute.href
       console.log(handleRedirectUrl)
