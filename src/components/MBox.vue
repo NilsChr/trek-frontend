@@ -35,6 +35,16 @@ const LINE_STYLE = {
   },
 }
 
+function zoomToPoint(map, lng, lat) {
+  map.flyTo({
+    center: [lng, lat],
+    zoom: 8,
+    duration: 1000,
+    essential: true // This animation is considered essential with
+    //respect to prefers-reduced-motion
+  });
+
+}
 
 function nameForLatLng(lat, lng) {
   return `${lat.toFixed(2)}, ${lng.toFixed(2)}`
@@ -115,6 +125,7 @@ export default {
         this.$store.dispatch("CHANGE_ORIGIN", item);
         this.$store.dispatch("LOAD_ROUTE");
       })
+      zoomToPoint(this.map, this.origin.lng, this.origin.lat)
       this.originMarker = marker
     },
     setDestinationMarker() {
@@ -136,6 +147,7 @@ export default {
         this.$store.commit("SET_DESTINATION", item);
         this.$store.dispatch("LOAD_ROUTE");
       })
+      zoomToPoint(this.map, this.destination.lng, this.destination.lat)
       this.destinationMarker = marker
     },
     setViaMarkers() {
@@ -219,14 +231,6 @@ export default {
           new Mapbox.Marker({ color: "#888", draggable: false })
             .setLngLat([leg.start.lon, leg.start.lat])
             .addTo(this.map);
-          // TODO zoom is not on relevant point
-          this.map.flyTo({
-            center: [leg.start.lon, leg.start.lat],
-            zoom: 8,
-            duration: 1000,
-            essential: true // This animation is considered essential with
-            //respect to prefers-reduced-motion
-          });
         });
       })
     }
