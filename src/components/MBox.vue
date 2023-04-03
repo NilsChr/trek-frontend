@@ -64,7 +64,8 @@ export default {
       styleDark: "mapbox://styles/mapbox/dark-v10",
       originMarker: null,
       destinationMarker: null,
-      viaMarkers: []
+      viaMarkers: [],
+      legsInMap: new Set(),
     };
   },
   methods: {
@@ -217,9 +218,13 @@ export default {
       });
     },
     addFinishedLegs() {
-      this.finishedLegs.map(leg => {
+      this.finishedLegs.forEach(leg => {
         const geojson = polyline.toGeoJSON(leg.polyline);
         console.log("polyline", { type: 'geojson', data: geojson })
+        if (this.legsInMap.has(leg.leg.id)) {
+          return
+        }
+        this.legsInMap.add(leg.leg.id)
         this.map.on("load", () => {
           this.map.addSource(leg.leg.id, { type: 'geojson', data: geojson });
           this.map.addLayer({
