@@ -28,7 +28,7 @@ export default {
       location.href = this.targetUrl;
     } else {
       console.log("sending home")
-      this.$router.push({ "name": "me" })
+      this.$router.push({ "name": "TrekUser" })
     }
   },
 };
