@@ -2,7 +2,7 @@ import axios from "axios";
 import store from "../store/index";
 
 const TOKEN_NAME = "trekToken"
-const BASE_URL = ""
+const BASE_URL = "/trek"
 function longLatToParams(item) {
   return item.lat + "," + item.lng;
 }
