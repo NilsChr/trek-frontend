@@ -2,6 +2,7 @@ import axios from "axios";
 import store from "../store/index";
 
 const TOKEN_NAME = "trekToken"
+const BASE_URL = ""
 function longLatToParams(item) {
   return item.lat + "," + item.lng;
 }
@@ -190,7 +191,7 @@ const TREK_API = {
     let header = getAuthHeader()
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.get(url + "/trek/" + trekId, { headers: header });
+        let res = await axios.get(url + `${BASE_URL}/` + trekId, { headers: header });
         resolve(res.data);
       } catch (e) {
         console.log("error!");
@@ -206,7 +207,7 @@ const TREK_API = {
     }
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.post(url + "/trek", payload, { headers: header });
+        let res = await axios.post(url + BASE_URL, payload, { headers: header });
         resolve({
           trekId: res.data.trek_id,
         });
@@ -221,7 +222,7 @@ const TREK_API = {
     let header = getAuthHeader()
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.put(url + `/trek/${trekId}`, data, { headers: header });
+        let res = await axios.put(url + `${BASE_URL}/${trekId}`, data, { headers: header });
         resolve();
       } catch (e) {
         console.log("error!");
@@ -237,7 +238,7 @@ const TREK_API = {
     }
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.post(url + `/trek/${trekId}/leg`, payload, { headers: header });
+        let res = await axios.post(url + `${BASE_URL}/${trekId}/leg`, payload, { headers: header });
         resolve({
           legId: res.data.leg_id,
         });
@@ -252,7 +253,7 @@ const TREK_API = {
     let header = getAuthHeader()
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.get(`${url}/trek/${trekId}/leg/${legId}`, { headers: header });
+        let res = await axios.get(`${url}${BASE_URL}/${trekId}/leg/${legId}`, { headers: header });
         resolve(res.data);
       } catch (e) {
         console.log("error!");
@@ -269,7 +270,7 @@ const TREK_API = {
     let header = getAuthHeader()
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.get(url + `/trek/${trekId}/invitation`, { headers: header });
+        let res = await axios.get(url + `${BASE_URL}/${trekId}/invitation`, { headers: header });
         resolve(res.data.invite_id);
       } catch (e) {
         console.log("error!");
@@ -285,7 +286,7 @@ const TREK_API = {
     let header = getAuthHeader()
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await axios.post(url + `/trek/${inviteId}/join`, {}, { headers: header });
+        let res = await axios.post(url + `${BASE_URL}/${inviteId}/join`, {}, { headers: header });
         resolve(res.data.trek_id);
       } catch (e) {
         console.log("error!");
