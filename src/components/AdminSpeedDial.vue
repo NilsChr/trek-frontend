@@ -90,7 +90,9 @@ export default {
             TREK_API.getInviteId(this.id)
                 .then(inviteId =>{
                     const joinTrekRoute = this.$router.resolve({ name: 'TrekJoin', params: { inviteId: inviteId } })
-                    const redirectBase = process.env.NODE_ENV === "development" ? "/" : "/trek/";
+                    // Always set base to /
+                    //const redirectBase = process.env.NODE_ENV === "development" ? "/" : "/trek/";
+                    const redirectBase = "/";
                     return window.location.origin + redirectBase + joinTrekRoute.href
                 })
                 .then(inviteUrl => navigator.clipboard.writeText(inviteUrl))
